@@ -1,0 +1,44 @@
+version: '2'
+services:
+  nginx:
+    image: evild/alpine-nginx:1.9.15-openssl
+    container_name: lemp_nginx
+    restart: always
+    links:
+      - php
+    volumes:
+      - /Users/sepp/Sites/PROJECT/www:/var/www/PROJECT/:rw
+      - ./nginx/conf/nginx.conf:/etc/nginx/conf/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+    ports:
+      - 80:80
+      - 443:443
+  php:
+    #image: evild/alpine-php:7.0.6
+    image: matriphe/alpine-php:fpm
+    container_name: lemp_php
+    restart: always
+    volumes:
+      - /Users/sepp/Sites/PROJECT/www:/var/www/PROJECT/:rw
+    depends_on:
+      - db
+    links:
+      - db
+    environment:
+      - DB_NAME=dbname
+      - TABLE_PREFIX=
+      - DB_HOST=lemp
+      - DB_PASSWORD=somepassword
+  db:
+    image: mariadb:latest
+    container_name: lemp_mariadb
+    restart: always
+    volumes:
+      - db-data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=somepassword
+    ports:
+      - 3306:3306
+volumes:
+  db-data:
+    driver: local
